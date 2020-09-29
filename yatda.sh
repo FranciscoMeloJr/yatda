@@ -1,4 +1,5 @@
-#!/bin/bash
+#! /bin/bash
+
 #
 # Yatda is just Yet Another Thread Dump Analyzer.  It focuses on 
 # providing quick JBoss EAP 7 specific statistics and known concerns.
@@ -10,6 +11,15 @@
 #    -n: number of stack lines to focus on from specified threads
 #    -a: number of stack lines to focus on from all threads
 #
+
+function helper_ {
+    echo  "Usage: sh ./yatda.sh THREAD_DUMP_FILE_NAME"
+    echo  "     -f: thead dump file name"
+    echo  "     -t: specify a thread name to focus on"
+    echo  "     -s: specify a particular generic line indicating thread usage"
+    echo  "     -n: number of stack lines to focus on from specified threads"
+    echo  "     -a: number of stack lines to focus on from all threads"
+}
 
 # default string references to search for generic EAP 7 request stats
 DUMP_NAME="Full thread dump "
@@ -24,7 +34,7 @@ ALL_LINE_COUNT=10
 
 
 # flags
-while getopts r:t:s:n:a:f: flag
+while getopts r:t:s:n:a:f:h: flag
 do
     case "${flag}" in
         r) REQUEST_THREAD_NAME=${OPTARG};;
@@ -33,13 +43,16 @@ do
         n) SPECIFIED_LINE_COUNT=${OPTARG};;
         a) ALL_LINE_COUNT=${OPTARG};;
         f) FILE_NAME=${OPTARG};;
+        h) helper_ ;;
     esac
 done
 
 if [ "x$FILE_NAME" = "x" ]; then
     echo "Please specify file name with -f flag"
+    echo "Or use -h for helper"
     exit
 fi
+
 
 # Check for a new yatda.sh.  Uncomment next line if you want to avoid this check
 # CHECK_UPDATE="false"
