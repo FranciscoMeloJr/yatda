@@ -4,14 +4,8 @@
 # Yatda is just Yet Another Thread Dump Analyzer.  It focuses on 
 # providing quick JBoss EAP 7 specific statistics and known concerns.
 #
-# Usage: sh ./yatda.sh <THREAD_DUMP_FILE_NAME>
-#    -f: thead dump file name
-#    -t: specify a thread name to focus on
-#    -s: specify a particular generic line indicating thread usage
-#    -n: number of stack lines to focus on from specified threads
-#    -a: number of stack lines to focus on from all threads
-#
 
+#Show helper function
 function helper_ {
     echo  "Usage: sh ./yatda.sh THREAD_DUMP_FILE_NAME"
     echo  "     -f: thead dump file name"
@@ -19,44 +13,24 @@ function helper_ {
     echo  "     -s: specify a particular generic line indicating thread usage"
     echo  "     -n: number of stack lines to focus on from specified threads"
     echo  "     -a: number of stack lines to focus on from all threads"
+    echo  "     -u: check update"
 }
 
-# default string references to search for generic EAP 7 request stats
-DUMP_NAME="Full thread dump "
-ALL_THREAD_NAME=" nid=0x"
-REQUEST_THREAD_NAME="default task-"
-REQUEST_TRACE="io.undertow.server.Connectors.executeRootHandler"
-REQUEST_COUNT=0
-SPECIFIED_THREAD_COUNT=0
-SPECIFIED_USE_COUNT=0
-SPECIFIED_LINE_COUNT=20
-ALL_LINE_COUNT=10
+#Set default string references to search for generic EAP 7 request stats
+function set_default_ {
+    DUMP_NAME="Full thread dump "
+    ALL_THREAD_NAME=" nid=0x"
+    REQUEST_THREAD_NAME="default task-"
+    REQUEST_TRACE="io.undertow.server.Connectors.executeRootHandler"
+    REQUEST_COUNT=0
+    SPECIFIED_THREAD_COUNT=0
+    SPECIFIED_USE_COUNT=0
+    SPECIFIED_LINE_COUNT=20
+    ALL_LINE_COUNT=10
+}
 
-
-# flags
-while getopts r:t:s:n:a:f:h: flag
-do
-    case "${flag}" in
-        r) REQUEST_THREAD_NAME=${OPTARG};;
-        t) SPECIFIED_THREAD_NAME=${OPTARG};;
-        s) SPECIFIED_TRACE=${OPTARG};;
-        n) SPECIFIED_LINE_COUNT=${OPTARG};;
-        a) ALL_LINE_COUNT=${OPTARG};;
-        f) FILE_NAME=${OPTARG};;
-        h) helper_ ;;
-    esac
-done
-
-if [ "x$FILE_NAME" = "x" ]; then
-    echo "Please specify file name with -f flag"
-    echo "Or use -h for helper"
-    exit
-fi
-
-
-# Check for a new yatda.sh.  Uncomment next line if you want to avoid this check
-# CHECK_UPDATE="false"
-if [ "x$CHECK_UPDATE" = "x" ]; then
+#Check update function
+function update_ {
     echo "Checking update. Uncomment CHECK_UPDATE in script if you wish to skip."
     DIR=`dirname "$(readlink -f "$0")"`
     SUM=`md5sum $DIR/yatda.sh | awk '{ print $1 }'`
@@ -72,8 +46,32 @@ if [ "x$CHECK_UPDATE" = "x" ]; then
         fi
     fi
     echo "Check complete."
+}
+
+
+# flags
+while getopts r:t:s:n:a:f:h:u: flag
+do
+    case "${flag}" in
+        r) REQUEST_THREAD_NAME=${OPTARG};;
+        t) SPECIFIED_THREAD_NAME=${OPTARG};;
+        s) SPECIFIED_TRACE=${OPTARG};;
+        n) SPECIFIED_LINE_COUNT=${OPTARG};;
+        a) ALL_LINE_COUNT=${OPTARG};;
+        f) FILE_NAME=${OPTARG};;
+        h) helper_ ;;
+        u) update_;;
+    esac
+done
+
+if [ "x$FILE_NAME" = "x" ]; then
+    echo "Please specify file name with -f flag"
+    echo "Or use -h for helper"
+    exit
 fi
 
+
+set_default_
 
 # Use different thread details if it looks like a thread dump from JBossWeb/Tomcat
 if [ `grep 'org.apache.tomcat.util' $FILE_NAME | wc -l` -gt 0 ]; then
@@ -88,7 +86,6 @@ fi
 #if [ `grep "$DUMP_NAME" $FILE_NAME | grep " 11\." | wc -l` -gt 0 ]; then
 #    echo "Treating as dump from java 11"
 #fi
-
 
 # Here we'll whip up some thread usage stats
 
