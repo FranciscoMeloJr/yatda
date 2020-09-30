@@ -5,6 +5,7 @@
 #It focuses on providing quick JBoss EAP 7 specific statistics and known concerns.
 #
 # v1.1 Using Kfir Lavi suggestions http://kfirlavi.herokuapp.com/blog/2012/11/14/defensive-bash-programming/
+# To debug, use: bash -x ./yatda.sh
 
 #Show helper function
 function helper_ {
@@ -28,6 +29,7 @@ function set_default_ {
     SPECIFIED_USE_COUNT=0
     SPECIFIED_LINE_COUNT=20
     ALL_LINE_COUNT=10
+    #DEBUGGER_FLAG=0
 }
 
 #Check update function
@@ -53,7 +55,7 @@ function update_ {
 # flags
 function read_input_ {
     local OPTIND
-    while getopts r:t:s:n:a:f:h:u: flag
+    while getopts r:t:s:n:a:f:h:u:d: flag
     do
         case "${flag}" in
             r) REQUEST_THREAD_NAME=${OPTARG};;
@@ -64,6 +66,7 @@ function read_input_ {
             f) FILE_NAME=${OPTARG};;
             h) helper_ ;;
             u) update_;;
+            d) DEBUGGER_FLAG=${OPTARG};;
         esac
     done
 
@@ -216,7 +219,7 @@ function top_all_thread_stacks_ {
 }
 
 # Focus on EAP boot threads
-function boot_threads {
+function boot_threads_ {
     echo  >> $FILE_NAME.yatda
     echo "## EAP BOOT THREAD INFO ##" >> $FILE_NAME.yatda
     echo  >> $FILE_NAME.yatda
@@ -232,6 +235,7 @@ function boot_threads {
     fi
 }
 
+#Display data for MSC service threads:
 function msc_service_ {
     COUNT=`grep "MSC service thread " $FILE_NAME | wc -l`
     if [ $COUNT -gt 0 ]; then
@@ -260,13 +264,15 @@ function msc_service_ {
 #Main function
 function main () {
 
+    set_default_
+    
     read_input_ "$@"
 
-    set_default_
+    if [[ $DEBUGGER_FLAG ]]; then  logger "STARTING LOGGER" > yatda.log; fi
 
     set_for_tomcat_
 
-    check_jdk11
+    ##check_jdk11
 
     stats_
 
@@ -278,7 +284,7 @@ function main () {
 
     count_top_line_all_requets_top_20_
 
-    count_top_line_all_requets_
+    count_top_line_all_requests_
 
     top_all_thread_stacks_
 
