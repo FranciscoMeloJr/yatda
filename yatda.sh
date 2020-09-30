@@ -261,6 +261,11 @@ function msc_service_ {
     fi
 }
 
+#Logger function
+function logger_ {
+    echo $1 >> yatda.log
+}
+
 #Main function
 function main () {
 
@@ -268,7 +273,7 @@ function main () {
     
     read_input_ "$@"
 
-    if [[ $DEBUGGER_FLAG ]]; then  logger "STARTING LOGGER" > yatda.log; fi
+    if [[ $DEBUGGER_FLAG ]]; then  logger_ $"STARTING YATDA"; fi
 
     set_for_tomcat_
 
@@ -292,6 +297,7 @@ function main () {
 
     msc_service_
 
+    if [[ $DEBUGGER_FLAG ]]; then  logger_ $"ENDING YATDA"; fi
 }
 
 #Starting main function
