@@ -1,3 +1,5 @@
+Note: This fork was created bc the original author hated functions. And i love functions.
+
 # yatda
 Yet another thread dump analyzer (yatda) is a simple script of helpful greps to help analyze java thread dumps for concerns, with a particular focus on JBoss/Tomcat threads and issues. The focal point of thread dumps is often where the thread is currently executing, or the top of the thread stack. So yatda collects and sorts the tops of thread stacks to see what threads are most commonly doing. It provides specific usage and stats of JBoss request threads and boot threads and can be specified to look for some other custom thread name if there is some other thread of interest.
 
